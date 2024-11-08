@@ -52,9 +52,9 @@ namespace TelloControl {
 
     // Function to connect to Tello Wi-Fi
     //% group="Tello"
-    //% block="connect to Tello Wi-Fi SSID %ssid|password %password"
-    export function connectToWiFi(ssid: string, password: string): void {
-        sendCommandToTello('AT+CWJAP="${ssid}","${password}"');
+    //% block="connect to Tello Wi-Fi SSID %ssid
+    export function connectToWiFi(ssid: string): void {
+        sendCommandToTello('AT+CWJAP="${ssid}"');
         basic.pause(5000); // Wait for connection to establish
         readResponse(); // Display response on micro:bit
     }
