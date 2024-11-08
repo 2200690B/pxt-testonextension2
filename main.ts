@@ -8,10 +8,16 @@ namespace TelloControl {
     // Function to read and display response on the micro:bit
     function readResponse(): void {
         let response = serial.readString();
-        if (response) { // Only act if there's something in the response
-            basic.showString(response);
+        if (response) { // Check if there is data to read
+            if (response.includes("ERROR") || response.includes("FAIL")) {
+                basic.showString("Err:"); // Show "Err:" as a prefix
+                basic.showString(response); // Display the exact error message
+            } else {
+                basic.showString("Resp:");
+                basic.showString(response); // Display the response if it's not an error
+            }
         } else {
-            basic.showString("-");
+            basic.showString("No Data");
         }
     }
 
