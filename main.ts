@@ -8,16 +8,11 @@ namespace TelloControl {
     // Function to read and display response on the micro:bit
     function readResponse(): void {
         let response = serial.readString();
-        if (response) { // Check if there is data to read
-            if (response.includes("ERROR") || response.includes("FAIL")) {
-                basic.showString("Err:"); // Show "Err:" as a prefix
-                basic.showString(response); // Display the exact error message
-            } else {
-                basic.showString("Resp:");
-                basic.showString(response); // Display the response if it's not an error
-            }
+        if (response.includes("OK")) {
+            basic.showString("Connected");
         } else {
-            basic.showString("No Data");
+            basic.showString("Failed");
+            basic.showString(response); // Display the actual error
         }
     }
 
@@ -49,10 +44,8 @@ namespace TelloControl {
         serial.setTxBufferSize(128);
         serial.setRxBufferSize(128);
 
-        sendAT("AT+RST", 1000); // Reset the ESP8266
-        basic.pause(2000); // Allow time for ESP8266 to reset
+        sendAT("AT+RST", 2000); // Reset the ESP8266
         sendAT("AT+CWMODE=1", 500); // Set ESP8266 to Station Mode (STA mode)
-        basic.pause(100);
     }
 
 
@@ -61,7 +54,7 @@ namespace TelloControl {
     //% group="Tello"
     //% block="connect to Tello Wi-Fi SSID %ssid|password %password"
     export function connectToWiFi(ssid: string, password: string): void {
-        sendCommandToTello(`AT+CWJAP="${ssid}","${password}"`);
+        sendCommandToTello('AT+CWJAP="${ssid}","${password}"');
         basic.pause(5000); // Wait for connection to establish
         readResponse(); // Display response on micro:bit
     }
