@@ -5,24 +5,28 @@ namespace TelloControl {
     let telloIP = "192.168.10.1";
     let commandPort = 8889;
 
+    // Function to read and display response on the micro:bit
+    function readResponse(): void {
+        let response = serial.readString();
+        if (response) { // Only act if there's something in the response
+            basic.showString(response);
+        } else {
+            basic.showString("-");
+        }
+    }
+
     function sendCommandToTello(command: string): void {
         // Assuming you're already connected to Tello WiFi
         sendAT('AT+CIPSTART="UDP","telloIP",commandPort', 500); // Set up UDP connection
         basic.pause(500); // Give some time for connection setup
 
         // Send command length and command
-        sendAT('AT+CIPSEND=${command.length}', 100);
+        sendAT('AT+CIPSEND=${command.length}', 500);
         serial.writeString(command + "\r\n"); // Send the actual command
-        basic.pause(100);
+        basic.pause(500);
+        readResponse(); // Display Tello's response
     }
 
-    function restEsp8266() {
-        sendAT("AT+RESTORE", 1000); // Restore to factory settings
-        sendAT("AT+RST", 1000); // Reset the ESP8266
-        sendAT("AT+CWMODE=1", 500); // Set ESP8266 to Station Mode (STA mode)
-    }
-
-    // Your existing functions like connectToTelloWiFi and sendCommandToTello follow here...
 
     function sendAT(command: string, wait: number = 0) {
         serial.writeString('${command}\u000D\u000A');
@@ -38,16 +42,22 @@ namespace TelloControl {
         basic.pause(100);
         serial.setTxBufferSize(128);
         serial.setRxBufferSize(128);
-        restEsp8266(); // Reset and set up ESP8266 in STA mode
+
+        sendAT("AT+RST", 1000); // Reset the ESP8266
+        basic.pause(2000); // Allow time for ESP8266 to reset
+        sendAT("AT+CWMODE=1", 500); // Set ESP8266 to Station Mode (STA mode)
+        basic.pause(100);
     }
 
 
 
-    //% block="connect to Tello WiFi"
+    // Function to connect to Tello Wi-Fi
     //% group="Tello"
-    export function connectToTelloWiFi(): void {
-        sendAT('AT+CWJAP="TELLO-D35165",""');
-        basic.pause(3000); // Give it time to connect
+    //% block="connect to Tello Wi-Fi SSID %ssid|password %password"
+    export function connectToWiFi(ssid: string, password: string): void {
+        sendCommandToTello(`AT+CWJAP="${ssid}","${password}"`);
+        basic.pause(5000); // Wait for connection to establish
+        readResponse(); // Display response on micro:bit
     }
 
 
