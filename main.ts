@@ -16,13 +16,10 @@ namespace TelloControl {
         }
     }
 
+
     function sendCommandToTello(command: string): void {
         // Assuming you're already connected to Tello WiFi
-        sendAT('AT+CIPSTART="UDP","telloIP",commandPort', 500); // Set up UDP connection
-        basic.pause(500); // Give some time for connection setup
-
-        // Send command length and command
-        sendAT('AT+CIPSEND=${command.length}', 500);
+        sendAT(`AT+CIPSEND=${command.length}`, 500);  // Send command length and command
         serial.writeString(command + "\r\n"); // Send the actual command
         basic.pause(500);
         readResponse(); // Display Tello's response
@@ -30,7 +27,7 @@ namespace TelloControl {
 
 
     function sendAT(command: string, wait: number = 0) {
-        serial.writeString('${command}\u000D\u000A');
+        serial.writeString(`${command}\u000D\u000A`);
         basic.pause(wait);
     }
 
@@ -50,13 +47,21 @@ namespace TelloControl {
 
 
 
-    // Function to connect to Tello Wi-Fi
+    // Function to connect to Tello Wi-Fi (1)
     //% group="Tello"
-    //% block="connect to Tello Wi-Fi SSID %ssid
+    //% block="connect to Tello Wi-Fi SSID %ssid"
     export function connectToWiFi(ssid: string): void {
-        sendCommandToTello('AT+CWJAP="${ssid}"');
-        basic.pause(5000); // Wait for connection to establish
+        setupUDPConnection(); // Run once
+        sendAT(`AT+CWJAP="${ssid}",""`, 5000); // Assuming no password is required
         readResponse(); // Display response on micro:bit
+    }
+
+    // Seting up UDP connection (2)
+    //% group="Tello"
+    //% block="Set up UDP connection"
+    function setupUDPConnection(): void {
+        sendAT(`AT+CIPSTART="UDP","${telloIP}",${commandPort}`, 500);
+        basic.pause(500); // Allow some time for connection setup
     }
 
 
