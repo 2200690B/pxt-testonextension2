@@ -59,7 +59,7 @@ namespace TelloControl {
     // Seting up UDP connection (2)
     //% group="Tello"
     //% block="Set up UDP connection"
-    function setupUDPConnection(): void {
+    export function setupUDPConnection(): void {
         sendAT(`AT+CIPSTART="UDP","${telloIP}",${commandPort}`, 500);
         basic.pause(500); // Allow some time for connection setup
     }
