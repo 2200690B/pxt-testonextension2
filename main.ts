@@ -31,8 +31,26 @@ namespace TelloControl {
         basic.pause(wait);
     }
 
+    //% block="Wi-Fi connected"
+    //% group="ESP8266"
+    export function isWiFiConnected(): boolean {
+        sendAT("AT+CWJAP?"); // This command checks the current Wi-Fi status
+        basic.pause(500); // Give time to get the response
+
+        let response = serial.readString(); // Read response from ESP8266
+
+        if (response.includes("No AP")) {
+            return false; // Not connected
+        } else if (response.includes("OK") || response.includes("Connected")) {
+            return true; // Connected
+        } else {
+            return false; // In case of other unexpected responses
+        }
+    }
+
     // Function to initialize ESP8266 and redirect serial communication
     //% block="initialize ESP8266 with TX %tx| RX %rx"
+    //% group="ESP8266"
     //% tx.defl=SerialPin.P8
     //% rx.defl=SerialPin.P12
     export function initESP8266(tx: SerialPin, rx: SerialPin): void {
@@ -45,8 +63,18 @@ namespace TelloControl {
         sendAT("AT+CWMODE=1", 500); // Set ESP8266 to Station Mode (STA mode)
     }
 
+    //% block="land"
+    //% group="Tello"
+    export function land(): void {
+        sendCommandToTello("land");
+    }
 
-
+    //% block="takeoff"
+    //% group="Tello"
+    export function takeOff(): void {
+        sendCommandToTello("takeoff");
+    }
+    
     // Function to connect to Tello Wi-Fi (1)
     //% group="Tello"
     //% block="connect to Tello Wi-Fi SSID %ssid"
@@ -64,25 +92,10 @@ namespace TelloControl {
         basic.pause(500); // Allow some time for connection setup
     }
 
-
-
     //% block="initialize Tello into SDK mode"
     //% group="Tello"
     export function initialize(): void {
         sendCommandToTello("command");
-    }
-
-
-    //% block="land"
-    //% group="Tello"
-    export function land(): void {
-        sendCommandToTello("land");
-    }
-
-    //% block="takeoff"
-    //% group="Tello"
-    export function takeOff(): void {
-        sendCommandToTello("takeoff");
     }
 
 }
